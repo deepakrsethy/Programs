@@ -1,4 +1,4 @@
-*Problem Statment :*
+Problem Statment :
 
 John likes to travel. He has visited a lot of cities over many years.
 Whenever he visits a city, he takes a few photos and saves them on his computer.
@@ -69,7 +69,7 @@ The new names of the photos are returned in the same order as in the given strin
 
 
 
-*Solution :*
+Solution :
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
