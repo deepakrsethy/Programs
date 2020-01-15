@@ -1,0 +1,176 @@
+Problem Statment :
+
+
+Solution :
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+public class Solution {
+
+    public static void main(String[] args) {
+
+        Solution solution = new Solution();
+        String input = "photo.jpg, Warsaw, 2013-09-05 14:08:15\n" +
+                "john.png, London, 2015-06-20 15:13:22\n" +
+                "myFriends.png, Warsaw, 2013-09-05 14:07:13\n" +
+                "Eiffel.jpg, Paris, 2015-07-23 08:03:02\n" +
+                "pisatower.jpg, Paris, 2015-07-22 23:59:59\n" +
+                "BOB.jpg, London, 2015-08-05 00:02:03\n" +
+                "notredame.png, Paris, 2015-09-01 12:00:00\n" +
+                "me.jpg, Warsaw, 2013-09-06 15:40:22\n" +
+                "a.png, Warsaw, 2016-02-13 13:33:50\n" +
+                "b.jpg, Warsaw, 2016-01-02 15:12:22\n" +
+                "c.jpg, Warsaw, 2016-01-02 14:34:30\n" +
+                "d.jpg, Warsaw, 2016-01-02 15:15:01\n" +
+                "e.png, Warsaw, 2016-01-02 09:49:09\n" +
+                "f.png, Warsaw, 2016-01-02 10:55:32\n" +
+                "g.jpg, Warsaw, 2016-02-29 22:13:11";
+
+        String output = solution.solution(input);
+        System.out.println(output);
+    }
+
+
+    public String solution(String S) {
+
+        String finalResult = ""; // to collect the final result
+
+        String[] input = S.split("\n"); //split the string at each new line
+
+        List<String> listOfPhotos = new ArrayList<>();
+        listOfPhotos = Arrays.asList(input);//collect the split strings into an ArrayList
+
+        Map<String, Integer> cityCountMap = new HashMap<>(); //to collect the highest count for each city
+
+        //Create a list of Photos which can be used for sorting on basis of Timestamp (Date)
+        List<Photo> photosWithoutCount = new ArrayList<>();
+        for (String s : listOfPhotos) {
+            String[] eachPhoto = s.split(",");
+            String cityName = eachPhoto[1];
+
+            Photo photo = new Photo();
+            photo.setPhotoName(eachPhoto[0]);
+            photo.setCity(cityName);
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                photo.setDate(formatter.parse(eachPhoto[2]));
+            }
+            catch (ParseException e) {
+                e.printStackTrace();
+            }
+            photosWithoutCount.add(photo);
+        }
+
+        //sort the list w.r.t. date
+        Collections.sort(photosWithoutCount, new TimeComparator());
+
+        //create another list after sorting with count. Count should be based on the date and not on input order
+        List<Photo> photosWithCount = new ArrayList<>();
+        for (Photo photo : photosWithoutCount) {
+
+            if (cityCountMap.containsKey(photo.getCity())) {
+                int count = cityCountMap.get(photo.getCity());
+                cityCountMap.put(photo.getCity(), count + 1);
+                photo.setCount(count + 1);
+
+            }
+            else {
+                cityCountMap.put(photo.getCity(), 1);
+                photo.setCount(1);
+            }
+            photosWithCount.add(photo);
+        }
+
+        //create the new name based on the city and count
+        Map<String, String> newNameMap = new HashMap<>();
+        for (Photo photo : photosWithCount) {
+
+            String cityName = photo.getCity();
+            String count = formatCount(photo.getCount(), cityCountMap.get(cityName));
+            String extn = (photo.getPhotoName()).split("[.]")[1];
+            String result = cityName + count + "." + extn + "\n";
+            newNameMap.put((photo.getPhotoName()).trim(), result);
+
+        }
+
+        //form the final result
+        for (String s : listOfPhotos) {
+            String[] eachPhoto = s.split(",");
+            String photoName = eachPhoto[0];
+            finalResult = finalResult + newNameMap.get(photoName.trim());
+        }
+
+        return finalResult;
+    }
+
+    //format the count by adding leading the zeros and based on the highest count
+    private String formatCount(int num, int digit) {
+        String format = String.format("%%0%dd", String.valueOf(digit).length());
+        String photoNumber = (String.format(format, num));
+        return photoNumber;
+    }
+
+    class Photo {
+        String photoName;
+        String city;
+        Date date;
+        int count;
+
+        public String getNewName() {
+            return newName;
+        }
+
+        public void setNewName(String newName) {
+            this.newName = newName;
+        }
+
+        String newName;
+
+        public String getPhotoName() {
+            return photoName;
+        }
+
+        public void setPhotoName(String photoName) {
+            this.photoName = photoName;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(int count) {
+            this.count = count;
+        }
+    }
+
+    //compare Photo on based on date
+    class TimeComparator implements Comparator<Photo> {
+        public int compare(Photo p1, Photo p2) {
+            if ((p1.getDate()).after(p2.getDate())) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        }
+    }
+}
+
